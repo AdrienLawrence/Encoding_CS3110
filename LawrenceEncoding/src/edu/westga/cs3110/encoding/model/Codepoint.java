@@ -30,7 +30,7 @@ public class Codepoint {
 	
 	public String toUTF32() {
 		
-		return "";
+		return String.format("%08X", this.codepoint);
 	}
 	
 	public String toUTF16() {
