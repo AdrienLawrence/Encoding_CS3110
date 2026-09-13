@@ -24,9 +24,11 @@ public class Codepoint {
 			
 		}
 		
-		if (value > 0x10FFFF) {
-			throw new IllegalArgumentException("Codepoint is outside the Unicode range");
+		if (!isValidCodepoint(value)) {
+			
+			throw new IllegalArgumentException("Codepoint is outside the valid Unicode range");
 		}
+		
 		this.codepoint = codepoint;
 	}
 	
@@ -53,14 +55,48 @@ public class Codepoint {
 		
 		int rightBits = 0xDC00 + (value & 0x3FF);
 		
-		
-		
 		return String.format("%04X%04X", leftBits, rightBits);
 	}
 	
 	public String toUTF8() {
 		
-		return "";
+	    int value = Integer.parseUnsignedInt(this.codepoint, 16);
+
+	    if (value <= 0x7F) {
+	    	
+	        return String.format("%02X", value);
+	        
+	    } else if (value <= 0x7FF) {
+	    	
+	        int firstByte = 0xC0 | (value >> 6);
+	        int secondByte = 0x80 | (value & 0x3F);
+
+	        return String.format("%02X%02X", firstByte, secondByte);
+	        
+	    } else if (value <= 0xFFFF) {
+	    	
+	        int firstByte = 0xE0 | (value >> 12);
+	        int secondByte = 0x80 | ((value >> 6) & 0x3F);
+	        int thirdByte = 0x80 | (value & 0x3F);
+
+	        return String.format("%02X%02X%02X", firstByte, secondByte, thirdByte);
+	        
+	    } else {
+	    	
+	        int firstByte = 0xF0 | (value >> 18);
+	        int secondByte = 0x80 | ((value >> 12) & 0x3F);
+	        int thirdByte = 0x80 | ((value >> 6) & 0x3F);
+	        int fourthByte = 0x80 | (value & 0x3F);
+
+	        return String.format("%02X%02X%02X%02X", firstByte, secondByte, thirdByte, fourthByte);
+	        
+	    }
+	}
+	
+	private static boolean isValidCodepoint(int value) {
+		
+		return (value <= 0x10FFFF) && !(value >= 0xD800 && value <= 0xDFFF);
+		
 	}
 	
 }
